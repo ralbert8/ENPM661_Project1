@@ -1,294 +1,390 @@
-# IMPORT REQUIRED LIBRARIES #
-
-import copy # Copying States
-import random # Randomizing Initial State
-import os # File Operations
-from collections import deque # Queue for BFS
+import copy
+import random
+import os
+from collections import deque
 
 
 
-# COUNT INVERSIONS OF A STATE #
 def count_inversions(flat_state):
+
+    """
+    Counts the number of inversions in a flat list.
+
+    Args:
+        flat_state (list): A flat list representing the state of the puzzle.
+
+    Returns:
+        int: The number of inversions in the list
+    """
+
     inversions = 0
 
-    # Loop Over All Pairs of Numbers
+    # Loop over all pairs of numbers
     for i in range(len(flat_state)):
         for j in range(i + 1, len(flat_state)):
 
-            # Increment Inversions if the Pair is Inverted
+            # Increment inversion count if pair is inverted
             if flat_state[i] and flat_state[j] and flat_state[i] > flat_state[j]:
                 inversions += 1
     
-    # Return the Number of Inversions
+    # Return the number of inversions
     return inversions
 
 
 
-# CHECK SOLVABILITY OF A STATE #
 def is_solvable(state):
 
-    # Flatten the State
+    """
+    Checks if a given state of the 8-puzzle is solvable.
+
+    Args:
+        state(list): A 3x3 list representing the state of the puzzle.
+
+    Returns:
+        bool: True if the state is solvable. False otherwise.
+    """
+
+    # Flatten the state
     flat_state = [num for row in state for num in row]
 
-    # Return True if the Number of Inversions is Even, False if Odd
+    # Return true if the number of inversions is even. False if odd
     return count_inversions(flat_state) % 2 == 0
 
 
 
-# SOLVABLE START STATE GENERATION #
 def generate_solvable_start():
+
+    """
+    Generates a random solvable state for the 8-puzzle.
+
+    Returns:
+        list: A 3x3 list represnting a solvable state of the puzzle.
+    """
+
+    # Loop until a solvable state is generated
     while True:
         
-        # Create a List of Numbers 0-8
+        # Create a list of numbers 0-8
         numbers = list(range(9))
 
-        # Shuffle the Numbers
+        # Shuffle the numbers
         random.shuffle(numbers)
 
-        # Reshape List into 3x3 Grid
+        # Reshape into a 3x3 grid
         state = [numbers[i:i+3] for i in range(0, 9, 3)]
 
-        # Return State if it is Solvable
+        # Return state if solvable
         if is_solvable(state):
             return state
 
 
 
-# FIND BLANK TILE #
 def find_blank_tile(state):
+
+    """
+    Finds the indices of the blank tile (0) in the state.
+
+    Returns:
+        tuple | None: A tuple (i, j) representing the row and column indices of the blank tile. None if the blank tile is not found.
+    """
 
     # Loop Over All Tiles
     for i in range(3):
         for j in range(3):
 
-            # Return Index of Blank Tile
+            # Return index of the blank tile.
             if state[i][j] == 0:
                 return i, j
             
-    # Return None if Blank Tile is Not Found
+    # Return None if the blank tile is not found
     return None
 
 
 
-# MOVE BLANK TILE LEFT #
 def move_left(state):
+
+    """
+    Moves the blank tile (0) to the left if valid.
+
+    Arguments:
+        state (list): A 3x3 list representing the current state of the puzzle.
+
+    Returns:
+        list | None: A new state with the blank tile moved left. None if the move is invalid.
+    """
     
-    # Find Indices of Blank Tile
+    # Find indices of blank tile
     i, j = find_blank_tile(state)
 
-    # If Blank Tile is Not on the Left Edge
+    # If blank tile is not on the left edge
     if j > 0:
 
-        # Copy the State of the System
+        # Copy the state of the system
         new_state = copy.deepcopy(state)
 
-        # Swap the Blank Tile with the Tile to the Left
+        # Swap the blank tile with the tile to the left
         new_state[i][j], new_state[i][j-1] = new_state[i][j-1], new_state[i][j]
 
-        # Return the New State
+        # Return the new state
         return new_state
     
-    # Return None if Blank Tile is on the Left Edge
+    # Return None if blank tile is on the left edge
     return None
 
 
 
-# MOVE BLANK TILE RIGHT #
 def move_right(state):
     
-    # Find Indices of Blank Tile
+    """
+    Moves the blank tile (0) to the right if valid.
+
+    Arguments:
+        state (list): A 3x3 list representing the current state of the puzzle.
+
+    Returns:
+        list | None: A new state with the blank tile moved right. None if the move is invalid.
+    """
+
+    # Find indices of blank tile
     i, j = find_blank_tile(state)
 
-    # If Blank Tile is Not on the Right Edge
+    # If blank tile is not on the right edge
     if j < 2:
 
-        # Copy the State of the System
+        # Copy the state of the system
         new_state = copy.deepcopy(state)
 
-        # Swap the Blank Tile with the Tile to the Right
+        # Swap the blank tile with the tile to the right
         new_state[i][j], new_state[i][j+1] = new_state[i][j+1], new_state[i][j]
 
-        # Return the New State
+        # Return the new
         return new_state
     
-    # Return None if Blank Tile is on the Right Edge
+    # Return None if blank tile is on the right edge
     return None
 
 
 
-# MOVE BLANK TILE UP #
 def move_up(state):
 
-    # Find Indices of Blank Tile
+    """
+    Moves the blank tile (0) up if valid.
+
+    Arguments:
+        state (list): A 3x3 list representing the current state of the puzzle.
+
+    Returns:
+        list | None: A new state with the blank tile moved up. None if the move is invalid.
+    """
+
+    # Find indices of blank tile
     i, j = find_blank_tile(state)
 
-    # If Blank Tile is Not on the Top Edge
+    # If blank tile is not on the top edge
     if i > 0:
 
-        # Copy the State of the System
+        # Copy the state of the system
         new_state = copy.deepcopy(state)
 
-        # Swap the Blank Tile with the Tile Above
+        # Swap blank tile with the tile above
         new_state[i][j], new_state[i-1][j] = new_state[i-1][j], new_state[i][j]
 
-        # Return the New State
+        # Return the new state
         return new_state
     
-    # Return None if Blank Tile is on the Top Edge
+    # Return none if the blank tile is on the top edge
     return None
 
 
 
-# MOVE BLANK TILE DOWN #
 def move_down(state):
 
-    # Find Indices of Blank Tile
+    """
+    Moves the blank tile (0) down if valid.
+
+    Arguments:
+        state (list): A 3x3 list representing the current state of the puzzle.
+
+    Returns:
+        list | None: A new state with the blank tile moved down. None if the move is invalid.
+    """
+
+    # Find indices of blank tile
     i, j = find_blank_tile(state)
 
-    # If Blank Tile is Not on the Bottom Edge
+    # If blank tile is not on the bottom edge
     if i < 2:
 
-        # Copy the State of the System
+        # Copy the state of the system
         new_state = copy.deepcopy(state)
 
-        # Swap the Blank Tile with the Tile Below
+        # Swap the blank tile with the tile below
         new_state[i][j], new_state[i+1][j] = new_state[i+1][j], new_state[i][j]
 
-        # Return the New State
+        # Return the new state
         return new_state
     
-    # Return None if Blank Tile is on the Bottom Edge
+    # Return none if the blank tile is on the bottom edge
     return None
 
 
 
-# SOLVE USING BFS #
 def bfs_solve(start_state, goal_state):
 
-    # Initialize Queue, Visited Dictionary, and Node Index
+    """
+    Solves the 8-puzzle using the Breadth-First Search (BFS) algorithm.
+
+    Arguments:
+        start_state (list): A 3x3 list representing the starting state of the puzzle.
+        goal_state (list): A 3x3 list representing the goal state of the puzzle.
+
+    Returns:
+        list | None: A list of tuples representing the exploration data. Each tuple contains
+        (node_index, parent_index, state). None if no solution is found.
+    """
+
+    # Initialize queue, visited dictionary, and node index
     queue = deque()
     visited = {}
     node_index = 0
 
-    # Append Start State to Queue
-    queue.append((start_state, node_index, -1))  # (state, index, parent_index)
+    # Append start state to queue (state, index, parent index)
+    queue.append((start_state, node_index, -1))
 
-    # Flatten Start State and Mark as Visited
+    # Flatten start state and mark as visited
     visited[tuple(map(tuple, start_state))] = node_index
 
-    # Initialize List to Store Exploration Data
+    # Initialize list to store exploration data
     nodes_info = []
     
-    # While Queue is Not Empty
+    # While queue is not empty
     while queue:
 
-        # Pop the First Element from the Queue
+        # Pop first element from queue
         state, current_index, parent_index = queue.popleft()
 
-        # Append Current State to Exploration Data
+        # Append current state to exploration data
         nodes_info.append((current_index, parent_index, state))
 
-        # If Current State is the Goal State
+        # If current state is the goal state
         if state == goal_state:
 
-            # Return Exploration Data
+            # Return exploration data
             return nodes_info
 
-        # Loop Over All Possible Moves
+        # Loop over all possible moves
         for move in [move_left, move_right, move_up, move_down]:
 
-            # Generate New State
+            # Generate new state
             new_state = move(state)
 
-            # If New State is Valid and Not Visited
+            # If new state is valid and unvisited
             if new_state and tuple(map(tuple, new_state)) not in visited:
 
-                # Increment Node Index
+                # Increment node index
                 node_index += 1
 
-                # Mark New State as Visited
+                # Mark new state as visited
                 visited[tuple(map(tuple, new_state))] = node_index
 
-                # Append New State to Queue
+                # Append new state to queue
                 queue.append((new_state, node_index, current_index))
 
-    # Return None if No Solution is Found
+    # Return none if no solution is found
     return None
 
 
 
-# BACKTRACK TO GENERATE PATH #
 def generate_path(nodes_info, goal_index):
 
-    # Initialize Path and Index Map
+    """
+    Generates the solution path from the exploration data.
+
+    Arguments:
+        nodes_info (list): A list of tuples representing the exploration data.
+        goal_index (int): The index of the goal state in the exploration data.
+
+    Returns:
+        list: A list of states representing the solution path from start to goal.
+    """
+
+    # Initialize path and index map
     path = []
     index_map = {node[0]: node for node in nodes_info}
 
-    # While Goal Index is Not -1 (Start State)
+    # While goal index is not -1 (Start state)
     while goal_index != -1:
 
-        # Append State to Path
+        # Append state to path
         path.append(index_map[goal_index][2])
 
-        # Move to Parent Index
+        # Move to parent index
         goal_index = index_map[goal_index][1]
     
-    # Return Reversed Path
+    # Return reversed path
     return path[::-1]
 
 
 
-# SAVE RESULTS #
 def save_results(nodes_info, solution_path):
+
+    """
+    Saves the exploration data and solution path to .txt files.
+
+    Arguments:
+        nodes_info (list): A list of tuples representing the exploration data.
+        solution_path (list): A list of states representing the solution path from start to goal.
+    """
     
-    # Find Directory of Script
+    # Find directory of script
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Change Directory to Script Directory
+    # Change working directory to script directory
     os.chdir(script_dir)
 
-    # Save Nodes
+    # Save nodes
     with open(os.path.join("Nodes.txt"), "w") as f:
         for node in nodes_info:
             f.write(str(node[2]) + "\n")
 
-    # Save Nodes Info
+    # Save nodes info
     with open(os.path.join("NodesInfo.txt"), "w") as f:
         for node in nodes_info:
             f.write(f"{node[0]} {node[1]} {node[2]}\n")
 
-    # Save Solution Path
+    # Save solution path
     with open(os.path.join("nodePath.txt"), "w") as f:
         for state in solution_path:
             flat_state = [str(state[i][j]) for j in range(3) for i in range(3)]
             f.write(" ".join(map(str, flat_state)) + "\n")
 
-# EXECUTE BFS SOLVER #
+
+
 if __name__ == "__main__":
 
-    # Generate Solvable Start State
+    # Generate solvable start state
     start_state = generate_solvable_start()
 
-    # Define Goal State
+    # Define goal state
     goal_state = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
 
-    # Solve Using BFS
+    # Solve using BFS
     nodes_info = bfs_solve(start_state, goal_state)
 
-    # If Solution is Found
+    # If solution is found
     if nodes_info:
 
-        # Generate Solution Path
+        # Generate solution path
         solution_path = generate_path(nodes_info, len(nodes_info) - 1)
 
-        # Save Results
+        # Save results
         save_results(nodes_info, solution_path)
 
-        # Inform User of Success
+        # Inform user of success
         print("Solution found.")
     
-    # If No Solution is Found
+    # If no solution is found
     else:
 
-        # Inform User of Failure
+        # Inform user of failure
         print("No solution found.")
